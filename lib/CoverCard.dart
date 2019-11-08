@@ -9,8 +9,11 @@ class CoverCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 100,
+      padding: const EdgeInsets.all(8),
+      margin: const EdgeInsets.all(8),
+      height: 200,
       width: 100,
+      color: Colors.blue[900],
       child: Image(
         image: NetworkImage(url),
       ),

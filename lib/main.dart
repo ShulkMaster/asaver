@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/CoverCard.dart';
+import 'networking/HttpResquest.dart';
 
 void main() {
   runApp(MyApp());
@@ -44,12 +45,17 @@ class _MyHomePageState extends State<MyHomePage> {
   /// este es el estado en el estado si es posible tener valores mutables es decir que aun
   /// despues que se crean se puede actualizar el valor y por tanto el modificador final no es necesario
   int _counter = 8;
+  List<String> photos = <String>[
+    'https://www.nocturnar.com/imagenes/imagenes-bonitas/Imagenes-con-mensajes-chidos-de-amor.jpg',
+    'https://img.imagenescool.com/ic/frases/frases_124.jpg',
+    'https://frasesparami.com/wp-content/uploads/2019/09/imagenes-bonitas.jpg'
+  ];
+  HttpRequest request = HttpRequest();
 
   void _incrementCounter() {
     setState(() {
       /// esta funcion setState se encarga de actualizar valores del estado e inmediatamente despues
-      /// llamar a la funcion build del widget papa para que los cambios que haga se vean en pantalla
-      /// si uno cambia valores sin volver a dibujar la pantalla entonces pareria que nada paso
+      /// llamar a la funcion build del widget papa para que los cambios que haga
       _counter = _counter + -2;
     });
   }
@@ -66,7 +72,15 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         ///center es un widget que automaticamne centra a los hijos dentro del padre
-        child: Column(
+        child: ListView.builder(itemBuilder: (BuildContext context, int index) {
+          request.getPokemons(8).then((onValue){
+            List<Map<String, dynamic>> cosa = onValue['results'];
+            print(onValue);
+            });
+          return CoverCard(url: photos[index]);
+
+        },
+          itemCount: photos.length,
          ///colunm es un widget que OMG pone todos los hijos en pocicion de columna
           //
           // Invoke "debug painting" (press "p" in the console, choose the
@@ -79,24 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // center the children vertically; the main axis here is the vertical
           // axis because Columns are vertical (the cross axis would be
           // horizontal).
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            Text(
-              'Mi imgagen de internet',
-            ),
-            CoverCard(
-              url:
-                  'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-            ),
-            CoverCard(
-              url:
-                  'https://www.audubon.org/sites/default/files/web_a1_1902_16_barred-owl_sandra_rothenberg_kk.jpg',
-            ),
-            CoverCard(
-              url:
-                  'https://www.audubon.org/sites/default/files/web_a1_1902_16_barred-owl_sandra_rothenberg_kk.jpg',
-            ),
-          ],
+
         ),
       ),
       floatingActionButton: FloatingActionButton(
