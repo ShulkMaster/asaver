@@ -7,15 +7,15 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  // Este es eñ widget que contiene todos los demas basicamente es la caja donde meto los
-  // todos los demas widgets.
+  /// Este es eñ widget que contiene todos los demas basicamente es la caja donde meto los
+  /// todos los demas widgets.
   @override //override significa sobre escribir la funcion de mi papa StatelessWidget
-  //aunque que ya exite y es obligatorio para esta funcion build
+  ///aunque que ya exite y es obligatorio para esta funcion build
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // este es el tema de la aplicacion.
+        /// este es el tema de la aplicacion.
 
         primarySwatch: Colors.deepPurple,
       ),
@@ -52,11 +52,17 @@ class _MyHomePageState extends State<MyHomePage> {
   ];
   HttpRequest request = HttpRequest();
 
-  void _incrementCounter() {
-    setState(() {
+  void _loadPokemon() {
+    request.getPokemons(8).then((onValue) {
+      List<dynamic> myList = onValue['results'];
+      myList.forEach((reg) {
+        print(reg['name']);
+        photos.add(reg['name']);
+      });
       /// esta funcion setState se encarga de actualizar valores del estado e inmediatamente despues
       /// llamar a la funcion build del widget papa para que los cambios que haga
-      _counter = _counter + -2;
+      setState(() {
+      });
     });
   }
 
@@ -72,32 +78,19 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         ///center es un widget que automaticamne centra a los hijos dentro del padre
-        child: ListView.builder(itemBuilder: (BuildContext context, int index) {
-          request.getPokemons(8).then((onValue){
-            List<Map<String, dynamic>> cosa = onValue['results'];
-            print(onValue);
-            });
-          return CoverCard(url: photos[index]);
+        child: ListView.builder(
+          itemBuilder: (BuildContext context, int index) {
+            ///ListView es un widget que que alinea a sus hijos en un eje ya sea horizontal o vertical
+            ///por defecto lo hace vertical y si la lista de elementos no cabe en la pantalla entonces
+            ///les permite ser deslizables o scrollable
 
-        },
+            return Text(photos[index]);
+          },
           itemCount: photos.length,
-         ///colunm es un widget que OMG pone todos los hijos en pocicion de columna
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: _loadPokemon,
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
