@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:http/http.dart' as req;
+import 'package:http/http.dart';
 
 class HttpRequest{
 
@@ -7,14 +7,23 @@ class HttpRequest{
   final int count = 20;
   final headers = {"Accept": "application/json"};
 
-  Future<Map<String, dynamic>> getPokemons(int offset) async {
+  Future<List<dynamic>> getPokemons(int offset) async {
     var endpoint = '$url?offset=$offset&limit=$count';
     print(endpoint);
-    var res = await req.get(Uri.encodeFull(endpoint), headers: headers);
+    var res = await get(Uri.encodeFull(endpoint), headers: headers);
+    if (res.statusCode != 200) {
+      return List<dynamic>();
+    }
+    return jsonDecode(res.body)['results'];
+  }
+
+  Future<Map<String, dynamic>>getPokemonInfo(String url) async{
+    var res = await get(Uri.encodeFull(url), headers: headers);
     if (res.statusCode != 200) {
       return Map<String, dynamic>();
     }
     return jsonDecode(res.body);
   }
+
 
 }

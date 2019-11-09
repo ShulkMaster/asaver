@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pokedex/CoverCard.dart';
+import 'package:pokedex/views/CoverCard.dart';
+import 'package:pokedex/models/Pokemon.dart';
+import 'package:pokedex/views/CoverCardAsync.dart';
 import 'networking/HttpResquest.dart';
 
 void main() {
@@ -17,7 +19,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         /// este es el tema de la aplicacion.
 
-        primarySwatch: Colors.deepPurple,
+        primarySwatch: Colors.blue,
       ),
       home: MyHomePage(title: 'Pokedex'),
     );
@@ -43,27 +45,25 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   /// este es el estado en el estado si es posible tener valores mutables es decir que aun
-  /// despues que se crean se puede actualizar el valor y por tanto el modificador final no es necesario
-  int _counter = 8;
-  List<String> photos = <String>[
-    'https://www.nocturnar.com/imagenes/imagenes-bonitas/Imagenes-con-mensajes-chidos-de-amor.jpg',
-    'https://img.imagenescool.com/ic/frases/frases_124.jpg',
-    'https://frasesparami.com/wp-content/uploads/2019/09/imagenes-bonitas.jpg'
-  ];
+  /// despues que se crean se pueprede actualizar el valor y por tanto el modificador final no es necesario
+  List<Pokemon> myPokemons = [];
   HttpRequest request = HttpRequest();
 
-  void _loadPokemon() {
-    request.getPokemons(8).then((onValue) {
-      List<dynamic> myList = onValue['results'];
-      myList.forEach((reg) {
-        print(reg['name']);
-        photos.add(reg['name']);
-      });
-      /// esta funcion setState se encarga de actualizar valores del estado e inmediatamente despues
-      /// llamar a la funcion build del widget papa para que los cambios que haga
-      setState(() {
-      });
+  @override
+  void initState() {
+    _loadPokemons();
+    super.initState();
+  }
+
+  _loadPokemons() async {
+    List<dynamic> myList = await request.getPokemons(myPokemons.length);
+    myList.forEach((reg) {
+      myPokemons.add(Pokemon(name: reg['name'], url: reg['url']));
     });
+
+    /// esta funcion setState se encarga de actualizar valores del estado e inmediatamente despues
+    /// llamar a la funcion build del widget papa para que los cambios que haga
+    setState(() {});
   }
 
   @override
@@ -79,18 +79,33 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         ///center es un widget que automaticamne centra a los hijos dentro del padre
         child: ListView.builder(
+          scrollDirection: Axis.vertical,
+          controller: ScrollController(),
           itemBuilder: (BuildContext context, int index) {
             ///ListView es un widget que que alinea a sus hijos en un eje ya sea horizontal o vertical
             ///por defecto lo hace vertical y si la lista de elementos no cabe en la pantalla entonces
             ///les permite ser deslizables o scrollable
-
-            return Text(photos[index]);
+            if (myPokemons[index].loaded) {
+              ///Aqui validamos que el pokemon ya se haya cargado, si esta cargado
+              ///podemos crear el widget de inmediato pero si no esta cargardo entonces
+              ///lo crearemos con un Future Builder que es otro witged que crea a su widget
+              ///hijo cuando el futuro se complete, tambien permite crear hijos en otros casos
+              ///como cuando ocurre un error en el futuro, cuando esta activo el futuro pero no se ha completado
+              return CoverCard(
+                pokemon: myPokemons[index],
+              );
+            } else {
+              return CoverCardAsync(
+                request.getPokemonInfo(myPokemons[index].url),
+                myPokemons[index],
+              );
+            }
           },
-          itemCount: photos.length,
+          itemCount: myPokemons.length,
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _loadPokemon,
+        onPressed: _loadPokemons,
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
